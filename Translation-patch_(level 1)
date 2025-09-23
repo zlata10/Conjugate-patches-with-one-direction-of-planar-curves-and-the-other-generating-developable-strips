@@ -1,0 +1,41 @@
+"""Provides a scripting component.
+    Inputs:
+        x: The x script variable
+        y: The y script variable
+    Output:
+        a: The a output variable"""
+
+__author__ = "zlata"
+__version__ = "2025.09.23"
+
+import rhinoscriptsyntax as rs
+"""GhPython inputs (set in component):
+U: list of floats (u values)
+V: list of floats (v values)
+a, c, d, b, k, e, l, f: floats
+Outputs:
+Pts: list[list[Rhino.Geometry.Point3d]] (grid of points)
+"""
+
+import math
+import Rhino.Geometry as rg
+
+# ---- helper: safe power for floats -----------------------------------------
+def _pow(base, exp):
+    # matches Python's float power, but guards common GH issues
+    return float(base) ** float(exp)
+
+# ---- evaluate X, Y, Z from the given equations -----------------------------
+# Equations:
+# X = a*u + c*sin(f * pi * v)     (user: "f is float but within the function of pi")
+# Y = d*v
+# Z = b*u^k + e*v^l
+
+Pts = []
+for vv in v:
+    for uu in u:
+        X = float(a)*float(uu) + float(c)*math.sin(float(f) * math.pi * float(vv))
+        Y = float(d)*float(vv)
+        Z = float(b)*_pow(float(uu), float(k)) + float(e)*_pow(float(vv), float(l))
+        pt = rg.Point3d(X, Y, Z)
+        Pts.append(pt)
