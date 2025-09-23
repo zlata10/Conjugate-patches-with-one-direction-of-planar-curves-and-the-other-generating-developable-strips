@@ -1,0 +1,38 @@
+"""Provides a scripting component.
+    Inputs:
+        x: The x script variable
+        y: The y script variable
+    Output:
+        a: The a output variable"""
+
+__author__ = "zlata"
+__version__ = "2024.08.22"
+
+import rhinoscriptsyntax as rs
+import math
+import Rhino.Geometry as rg
+
+def X(u, v, a, b, k, o):
+    # Calculate components of the vector X(u, v)
+    
+    # First component (x)
+    x = (b * k * o * v**k + math.cosh(u) * (b * k * v**k * math.cos(v) + v * (a + b * v**k) * math.sin(v))) / (v * (o * math.cos(v) + math.cosh(u)))
+    
+    # Second component (y)
+    y = (o * (v * (a + b * v**k) * math.cos(v) - b * k * v**k * math.sin(v)) * math.sinh(u)) / (v * (o * math.cos(v) + math.cosh(u)))
+    
+    # Third component (z)
+    z = (math.sqrt(1 - o**2) * math.cosh(u) * (v * (a + b * v**k) * math.cos(v) - b * k * v**k * math.sin(v))) / (v * (o * math.cos(v) + math.cosh(u)))
+    
+    return (x, y, z)
+
+points = []
+for i in range (len(u)):
+    for j in range (len(v)):
+        x = X(u[i],v[j],a,b,k,o)[0]
+        y = X(u[i],v[j],a,b,k,o)[1]
+        z = X(u[i],v[j],a,b,k,o)[2]
+        Point = rg.Point3d(x,y,z)
+        points.append(Point)
+
+Points = points
