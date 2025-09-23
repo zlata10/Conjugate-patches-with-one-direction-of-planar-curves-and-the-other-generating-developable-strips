@@ -1,0 +1,92 @@
+# requirements: numpy
+# requirements: scipy
+# requirements: sympy
+# by Aly Abdelmagid (01/07/2025)
+import numpy as np
+from sympy import symbols, parse_expr, Matrix, sqrt, lambdify, diff, sin, cos
+from scipy.integrate import fixed_quad
+import Rhino.Geometry as rg
+
+acc = int(accuracy)
+
+def MongeSurf(X_str, u1=[], v1=[]):
+    u, v = symbols('u v', real=True)
+
+    def X(X_str):
+        X_func_List = []
+        for f in X_str:
+            my_symbols = {'u': u, 'v': v}
+            my_func = parse_expr(f, my_symbols)
+            X_func_List.append(my_func)
+        return X_func_List
+
+    X_funcs = X(X_str)
+    C = Matrix([X_funcs[0], X_funcs[1], X_funcs[2]])
+    P = X_funcs[3]
+    Q = X_funcs[4]
+
+    D1c = diff(C, u)
+    D2c = diff(C, u, u)
+    D3c = diff(C, u, u, u)
+
+    L = D1c.cross(D2c)
+    NormL = sqrt(L.dot(L))
+    Tc = (L.dot(D3c)) / (L.dot(L))
+
+    def DTc(u_val):
+        val = Tc * sqrt(D1c.dot(D1c))
+        f = lambdify(u, val, modules=["numpy"])
+        return f(u_val)
+
+    Theta = []
+    for i in range(len(u1)):
+        theta_val = fixed_quad(lambda t: DTc(t), u1[0], u1[i], n=acc)[0]
+        Theta.append(theta_val)
+
+    TF = D1c / sqrt(D1c.dot(D1c))
+    BF = L / NormL
+    NF = BF.cross(TF)
+
+    def eval_vec(expr, u_val):
+        return np.array([
+            float(eval(str(expr[0]), {"u": u_val, "sin": np.sin, "cos": np.cos, "sqrt": np.sqrt, "pi": np.pi})),
+            float(eval(str(expr[1]), {"u": u_val, "sin": np.sin, "cos": np.cos, "sqrt": np.sqrt, "pi": np.pi})),
+            float(eval(str(expr[2]), {"u": u_val, "sin": np.sin, "cos": np.cos, "sqrt": np.sqrt, "pi": np.pi}))
+        ])
+
+    NT = []
+    BT = []
+
+    for i in range(len(u1)):
+        nf = eval_vec(NF, u1[i])
+        bf = eval_vec(BF, u1[i])
+        angle = Theta[i]
+        NT.append(np.cos(angle) * nf - np.sin(angle) * bf)
+        BT.append(np.sin(angle) * nf + np.cos(angle) * bf)
+
+    def C_(u_val):
+        return eval_vec(C, u_val)
+
+    def P_(v_val):
+        return float(eval(str(P), {"v": v_val, "sin": np.sin, "cos": np.cos, "sqrt": np.sqrt, "pi": np.pi}))
+
+    def Q_(v_val):
+        return float(eval(str(Q), {"v": v_val, "sin": np.sin, "cos": np.cos, "sqrt": np.sqrt, "pi": np.pi}))
+
+    Pts = []
+    for i in range(len(u1)):
+        for j in range(len(v1)):
+            base = C_(u1[i])
+            p_comp = P_(v1[j]) * NT[i]
+            q_comp = Q_(v1[j]) * BT[i]
+            pt = base + p_comp + q_comp
+            Pts.append(pt)
+
+    return Pts
+
+# Main call
+Pts = MongeSurf(X, u_list, v_list)
+
+# Output as Rhino points
+gh_points = [rg.Point3d(p[0], p[1], p[2]) for p in Pts]
+a = gh_points
