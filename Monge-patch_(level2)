@@ -7,6 +7,17 @@ from sympy import symbols, parse_expr, Matrix, sqrt, lambdify, diff, sin, cos
 from scipy.integrate import fixed_quad
 import Rhino.Geometry as rg
 
+"""
+input data example:
+for spatial curve and planar curve (the first three equasions are for the spatial and second two for the profile curve) - input them as a list of five strings through panel:
+cos(2*pi*u)
+2*sin(2*pi*u) 
+(sin(2*pi*u))**2
+(9/10)*cos(2*pi*v)
+(5/10)*sin(2*pi*v)
+"""
+
+
 acc = int(accuracy)
 
 def MongeSurf(X_str, u1=[], v1=[]):
