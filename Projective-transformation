@@ -1,0 +1,27 @@
+"""Provides a scripting component.
+    Inputs:
+        Points: Given list of points to transform
+        a: float list from four members (a1, a2, a3, a4)
+        b: float list from four members (b1, b2, b3, b4)
+        c: float list from four members (c1, c2, c3, c4)
+        d: float list from four members (d1, d2, d3, d4)
+    Output:
+        New_Points: transformed list of points
+
+__author__ = "zlata"
+__version__ = "2022.10.05"
+
+import rhinoscriptsyntax as rs
+
+#calculating new coordinates
+
+Points_new = []
+
+for i in range(0, len(Points)):
+    X_new = (a[0]* Points[i].X + a[1] * Points[i].Y + a[2] * Points[i].Z + a[3]) / (d[0]* Points[i].X + d[1] * Points[i].Y + d[2] * Points[i].Z + d[3])
+    Y_new = (b[0]* Points[i].X + b[1] * Points[i].Y + b[2] * Points[i].Z + b[3]) / (d[0]* Points[i].X + d[1] * Points[i].Y + d[2] * Points[i].Z + d[3])
+    Z_new = (c[0]* Points[i].X + c[1] * Points[i].Y + c[2] * Points[i].Z + c[3]) / (d[0]* Points[i].X + d[1] * Points[i].Y + d[2] * Points[i].Z + d[3])
+    point_new = rs.Rhino.Geometry.Point3d(X_new, Y_new, Z_new)
+    Points_new.append(point_new)
+    
+New_Points = Points_new
