@@ -1,0 +1,83 @@
+"""Provides a scripting component.
+    Inputs:
+        x: The x script variable
+        y: The y script variable
+    Output:
+        a: The a output variable"""
+
+__author__ = "zlata"
+__version__ = "2025.09.24"
+
+import rhinoscriptsyntax as rs
+"""
+GhPython component (Rhino 8)
+
+Inputs (names & types):
+- u_start : float   # start multiplier (scaled by -pi)
+- u_end   : float   # end multiplier (scaled by pi)
+- u_div   : int     # number of divisions for U
+
+- v_start : float   # start multiplier (scaled by -pi)
+- v_end   : float   # end multiplier (scaled by pi)
+- v_div   : int     # number of divisions for V
+
+- R : float
+- w : float
+
+Output:
+- Pts : list[list[Rhino.Geometry.Point3d]]  # grid with len(V) rows x len(U) columns
+"""
+
+import math
+import Rhino.Geometry as rg
+
+# --- helper: linspace ------------------------------------------------------
+def linspace(a, b, n):
+    """Return n equally spaced samples from a to b (inclusive if n>1)."""
+    if n <= 1:
+        return [0.5 * (a + b)]
+    step = (b - a) / float(n - 1)
+    return [a + i * step for i in range(n)]
+
+# --- defaults for testing if inputs not wired ------------------------------
+try: u_start
+except NameError: u_start = 1.0
+try: u_end
+except NameError: u_end = 1.0
+try: u_div
+except NameError: u_div = 40
+
+try: v_start
+except NameError: v_start = 1.0
+try: v_end
+except NameError: v_end = 1.0
+try: v_div
+except NameError: v_div = 40
+
+try: R
+except NameError: R = 1.0
+try: w
+except NameError: w = 0.0
+
+# --- build U and V lists ---------------------------------------------------
+U = linspace(-math.pi * float(u_start), math.pi * float(u_end), max(2, int(u_div)))
+V = linspace(-math.pi * float(v_start), math.pi * float(v_end), max(2, int(v_div)))
+
+# --- compute points --------------------------------------------------------
+Pts = []
+
+for vv in V:
+    row = []
+    cos_v = math.cos(vv)
+    sin_v = math.sin(vv)
+    for uu in U:
+        arg = uu + w
+        denom = math.cosh(arg)
+
+
+        X = R * (cos_v / denom)
+        Y = R * (sin_v / denom)
+        Z = R * (uu - math.tanh(arg))
+
+        pt = rg.Point3d(X, Y, Z)
+        Pts.append(pt)
