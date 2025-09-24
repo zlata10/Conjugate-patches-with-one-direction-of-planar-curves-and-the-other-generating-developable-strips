@@ -1,0 +1,62 @@
+
+__author__ = "zlata"
+__version__ = "2025.09.24"
+
+import rhinoscriptsyntax as rs
+"""
+GhPython component (Rhino 8)
+
+Inputs (names & types):
+- U : list of float   # u-samples
+- V : list of float   # v-samples
+- R : float
+- w : float
+
+Output:
+- Pts : list[list[Rhino.Geometry.Point3d]]  # grid: len(V) rows x len(U) columns
+"""
+
+import math
+import Rhino.Geometry as rg
+
+# -------- defaults for quick testing if inputs aren't wired -----------------
+try:
+    u
+except NameError:
+    u = [i*0.1 for i in range(-20, 21)]  # -2..2
+
+try:
+    v
+except NameError:
+    v = [i*math.pi/24.0 for i in range(-24, 25)]  # -pi..pi
+
+try:
+    R
+except NameError:
+    R = 1.0
+
+try:
+    w
+except NameError:
+    w = 0.0
+
+# -------- compute points ----------------------------------------------------
+Pts = []  # rows over V, columns over U
+
+for vv in v:
+    row = []
+    cos_v = math.cos(vv)
+    sin_v = math.sin(vv)
+    vw = vv + w
+    vw2 = vw * vw
+    for uu in u:
+        cosh_u = math.cosh(uu)
+        denom = vw2 + cosh_u*cosh_u  # (v+w)^2 + cosh(u)^2
+
+        num_common = 2.0 * cosh_u
+        X = R * (num_common * (cos_v + vw * sin_v) / denom)
+        Y = R * (num_common * (sin_v - vw * cos_v) / denom)
+        Z = R * (uu - math.sinh(2.0 * uu) / denom)
+
+        pt = rg.Point3d(X, Y, Z)
+        Pts.append(pt)
