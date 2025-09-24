@@ -1,0 +1,34 @@
+"""
+GhPython component (Rhino 8)
+
+Inputs:
+- V : list of float   # v values
+- W : list of float   # w values
+- R : float           # single float
+- u : float           # single float
+
+Output:
+- Pts : list[Rhino.Geometry.Point3d]  # flattened list of 3D points
+"""
+
+import math
+import Rhino.Geometry as rg
+
+Pts = []
+
+cosh_u = math.cosh(u)
+sinh_2u = math.sinh(2.0 * u)
+
+for vv in v:
+    cos_v = math.cos(vv)
+    sin_v = math.sin(vv)
+    for ww in w:
+        vw = vv + ww
+        denom = vw**2 + cosh_u**2
+
+
+        X = R * (2.0 * cosh_u * (cos_v + vw * sin_v) / denom)
+        Y = R * (2.0 * cosh_u * (sin_v - vw * cos_v) / denom)
+        Z = R * (u - sinh_2u / denom)
+
+        Pts.append(rg.Point3d(X, Y, Z))
