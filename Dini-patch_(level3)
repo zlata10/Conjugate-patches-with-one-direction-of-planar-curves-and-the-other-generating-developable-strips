@@ -1,0 +1,77 @@
+
+__author__ = "zlata"
+__version__ = "2025.09.24"
+
+import rhinoscriptsyntax as rs
+"""
+GhPython component (Rhino 8)
+
+Inputs (names & types):
+- U : list of float   # u-samples
+- V : list of float   # v-samples
+- R : float
+- w : float
+- s : float           # interpreted as s*pi in trig
+
+Output:
+- Pts : list[list[Rhino.Geometry.Point3d]]  # grid with len(V) rows and len(U) columns
+"""
+
+import math
+import Rhino.Geometry as rg
+
+# --- defaults if inputs not wired (for quick testing) -----------------------
+try:
+    u
+except NameError:
+    u = [i*0.1 for i in range(-20, 21)]  # -2.0..2.0
+
+try:
+    v
+except NameError:
+    v = [i*math.pi/24.0 for i in range(-24, 25)]  # -pi..pi
+
+try:
+    R
+except NameError:
+    R = 1.0
+
+try:
+    w
+except NameError:
+    w = 0.0
+
+try:
+    s
+except NameError:
+    s = 0.25  # means s*pi = pi/4
+
+# --- precompute trig for s*pi -----------------------------------------------
+s_ang = math.pi / float(s) 
+cos_s = math.cos(s_ang)
+tan_s = math.tan(s_ang)
+
+# If cos(s*pi) is ~0, expressions with 1/cos(s) blow up; guard it.
+EPS = 1e-12
+singular = abs(cos_s) < EPS
+
+Pts = []
+
+for vv in v:
+    cos_v = math.cos(vv)
+    sin_v = math.sin(vv)
+    for uu in u:
+
+        inv_cos_s = 1.0 / cos_s
+        arg = uu * inv_cos_s - vv * tan_s + w  # argument of cosh/tanh
+
+        denom = math.cosh(arg)
+        # cosh(x) >= 1, so no zero-division; still guard against overflow to inf
+
+
+        X = R * (cos_s * cos_v) / denom
+        Y = R * (cos_s * sin_v) / denom
+        Z = R * (uu - cos_s * math.tanh(arg))
+
+        pt = rg.Point3d(X, Y, Z)
+        Pts.append(pt)
