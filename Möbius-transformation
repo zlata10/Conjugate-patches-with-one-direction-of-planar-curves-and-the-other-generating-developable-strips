@@ -1,0 +1,49 @@
+"""Provides a scripting component.
+    Inputs:
+        x: The x script variable
+        y: The y script variable
+    Output:
+        a: The a output variable"""
+
+__author__ = "zlata"
+__version__ = "2024.08.19"
+
+import rhinoscriptsyntax as rs
+import math
+import Rhino.Geometry as rg
+
+
+
+def compute_Xss(A, B, C, X, Y, Z):
+    # Calculate the components of Nrm2X
+    Nrm2X = X**2 + Y**2 + Z**2
+
+    # Calculate the vector X(u, v) minus the scaled vector
+    Vec = [
+        X - Nrm2X * A,
+        Y - Nrm2X * B,
+        Z - Nrm2X * C
+    ]
+    
+    # Compute the dot product Vec(u, v) . Vec(u, v)
+    dot_product = Vec[0]**2 + Vec[1]**2 + Vec[2]**2
+    
+    
+    # Compute the cross product Nrm2X(u, v) × Vec(u, v)
+    scaled_vector = [Nrm2X * component for component in Vec]
+    
+    # Compute Xss(u, v)
+    Xss = [scaled_vector[0]/ dot_product, scaled_vector[1]/ dot_product, scaled_vector[2]/ dot_product]
+    
+    return Xss
+
+
+
+points =[]
+
+for i in range (len(Start_Points)):
+    new_coordinates = compute_Xss(A, B, C, Start_Points[i].X, Start_Points[i].Y, Start_Points[i].Z)
+    Point = rg.Point3d(new_coordinates[0], new_coordinates[1], new_coordinates[2])
+    points.append(Point)
+    
+Points = points
