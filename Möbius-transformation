@@ -1,9 +1,11 @@
 """Provides a scripting component.
     Inputs:
-        x: The x script variable
-        y: The y script variable
+        Start_Points - Input points to transform
+        A: input paramater as float
+        B: input parameter as float
+        C: input parameter as float
     Output:
-        a: The a output variable"""
+        Points: Transformed points
 
 __author__ = "zlata"
 __version__ = "2024.08.19"
