@@ -1,2 +1,2 @@
 # Conjugate-patches-with-one-direction-of-planar-curves-and-the-other-generating-developable-strips
-This repository includes the python code for the multiple levels of conjugate patches investigated in the research paper called "Pre-rationalization approach for the low-tech falsework-free bamboo structure of doubly curved surfaces". It is meant to be avaliable for designers that can use it for architectural tool in Grasshopper.
+This repository includes the python code for the multiple levels of conjugate patches investigated in the research paper called "Pre-rationalization approach for the low-tech falsework-free bamboo structure of doubly curved surfaces". It is meant to be avaliable for designers that can use it as architectural tool in Grasshopper.
