@@ -1,0 +1,87 @@
+
+__author__ = "zlata"
+__version__ = "2025.09.24"
+
+import rhinoscriptsyntax as rs
+
+"""
+GhPython component (Rhino 8)
+
+Inputs:
+- u_start : float   # start of u-domain (will be multiplied by pi)
+- u_end   : float   # end of u-domain   (will be multiplied by pi)
+- u_div   : int     # number of u samples (>=2 recommended)
+
+- v_start : float   # start of v-domain (will be multiplied by pi)
+- N       : float   # parameter to compute v_end = N/d
+- v_div   : int     # number of v samples (>=2 recommended)
+
+- R : float
+- p : float
+- q : float
+
+Output:
+- Pts : list[Rhino.Geometry.Point3d]  # flattened list of points over V×U
+"""
+
+import math
+import Rhino.Geometry as rg
+
+# ---------------- helpers ----------------
+def linspace(a, b, n):
+    """n equally spaced samples from a to b (inclusive if n>1)."""
+    n = int(n)
+    if n <= 1:
+        return [0.5*(a+b)]
+    step = (b - a) / float(n)
+    return [a + i*step for i in range(n+1)]
+
+# ---------------- compute d and c ----------------
+if q == 0.0:
+    d = float('inf')  # avoid division by zero
+else:
+    d = float(p) / float(q)
+
+val = 1.0 - d*d
+if val < 0.0:
+    # invalid (imaginary) c -> no points
+    Pts = []
+else:
+    c = math.sqrt(val)
+
+    # ---------------- build parameter lists ----------------
+    u_a = math.pi * float(u_start)
+    u_b = math.pi * float(u_end)
+    u = linspace(u_a, u_b, u_div)
+
+    v_a = math.pi * float(v_start)
+    v_b = N/d * math.pi
+
+    v = linspace(v_a, v_b, v_div)
+
+    # ---------------- evaluate points ----------------
+    Pts = []
+
+    for vv in v:
+        cos_v = math.cos(vv)
+        sin_v = math.sin(vv)
+        dv = d * vv
+        cos_dv = math.cos(dv)
+        sin_dv = math.sin(dv)
+        sin_dv2 = sin_dv * sin_dv
+
+        for uu in u:
+            cu = c * uu
+            cosh_cu = math.cosh(cu)
+            sinh_2cu = math.sinh(2.0 * cu)
+
+            denom = c * (d*d) * (cosh_cu*cosh_cu) + (c**3) * sin_dv2
+
+            num_common = 2.0 * d * cosh_cu
+
+            X = R * ( num_common * ( d * cos_v * cos_dv + sin_v * sin_dv ) / denom )
+            Y = R * ( num_common * ( d * sin_v * cos_dv - cos_v * sin_dv ) / denom )
+            Z = R * ( uu - ( (d*d) * sinh_2cu / denom ) )
+
+            Pts.append(rg.Point3d(X, Y, Z))
+print(d, c)
