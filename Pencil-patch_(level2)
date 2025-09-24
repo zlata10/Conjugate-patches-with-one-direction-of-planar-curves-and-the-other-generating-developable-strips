@@ -1,9 +1,13 @@
 """Provides a scripting component.
     Inputs:
-        x: The x script variable
-        y: The y script variable
+        u: list of floats
+        v: list of floats
+        a: float
+        b: float
+        k: float
+        o: float
     Output:
-        a: The a output variable"""
+        Points: as Point3d list
 
 __author__ = "zlata"
 __version__ = "2024.08.22"
